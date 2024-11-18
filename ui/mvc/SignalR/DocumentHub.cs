@@ -4,9 +4,9 @@
 
     public class DocumentHub : Hub
     {
-        public void DocumentStatusChanged(string documentId, string status)
+        public async Task NotifyDocumentStatusChanged(string documentId, string status)
         {
-            Clients.All.SendAsync("DocumentStatusChanged", documentId, status);            
+            await Clients.All.SendAsync("DocumentStatusChanged", documentId, status);
         }
     }
 }

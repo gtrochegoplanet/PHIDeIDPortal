@@ -21,7 +21,6 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using PhiDeidPortal.Ui.Services;
 using System.Net.Http;
-using Microsoft.AspNetCore.SignalR;
 using PhiDeidPortal.Ui.SignalR;
 
 namespace PhiDeidPortal.Ui
