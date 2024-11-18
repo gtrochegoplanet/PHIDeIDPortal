@@ -1,4 +1,5 @@
 using Azure.Identity;
+using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Sas;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -19,6 +21,8 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using PhiDeidPortal.Ui.Services;
 using System.Net.Http;
+using Microsoft.AspNetCore.SignalR;
+using PhiDeidPortal.Ui.SignalR;
 
 namespace PhiDeidPortal.Ui
 {
@@ -60,7 +64,25 @@ namespace PhiDeidPortal.Ui
 
             var configuration = builder.Configuration.GetSection("StorageAccount");
             var storageAccountUri = configuration["Uri"];
-            var blobServiceClient = new BlobServiceClient(new Uri(storageAccountUri), new DefaultAzureCredential());
+            
+            var accountName = configuration["AccountName"];
+            var accountKey = configuration["Key"];
+
+            if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(accountKey))
+            {
+                throw new InvalidOperationException("Storage account name or key is not configured properly.");
+            }
+
+            BlobServiceClient blobServiceClient;
+
+            if (builder.Environment.IsDevelopment())
+            {
+                blobServiceClient = new BlobServiceClient(new Uri(storageAccountUri), new StorageSharedKeyCredential(accountName, accountKey));
+            }
+            else
+            {
+                blobServiceClient = new BlobServiceClient(new Uri(storageAccountUri), new DefaultAzureCredential());
+            }
 
             builder.Services.AddSingleton(x =>
             {
@@ -126,8 +148,9 @@ namespace PhiDeidPortal.Ui
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+            builder.Services.AddSignalR();
 
-            var app = builder.Build();
+            var app = builder.Build();            
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -148,6 +171,7 @@ namespace PhiDeidPortal.Ui
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
             app.MapRazorPages();
+            app.MapHub<DocumentHub>("/documentHub");
 
             app.Run();
         }
