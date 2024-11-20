@@ -9,6 +9,10 @@
     <UserSecretsId>fd9070e2-2767-4b56-b524-dcecdad9fb83</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
     <PackageReference Include="Azure.Search.Documents" Version="11.6.0" />
